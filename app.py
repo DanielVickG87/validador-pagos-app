@@ -24,8 +24,8 @@ st.title("🛡️ Validador de Pagos Mensuales")
 st.subheader("Centro de Prototipado - Universidad Nacional de Colombia")
 
 # --- VARIABLES GLOBALES / CONFIG ---
-# API Keys harcodeadas para conveniencia del usuario
-DEFAULT_GROQ_KEY = "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"
+# Deja la API Key vacía para que cada usuario ponga la suya
+DEFAULT_GROQ_KEY = ""
 DEFAULT_MODEL = "openai/gpt-oss-120b"
 
 MESES = {
