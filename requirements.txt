@@ -2,5 +2,5 @@ streamlit
 pypdf
 python-docx
 groq
-pandas
-jinja2
+openai
+python-dotenv
