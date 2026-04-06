@@ -125,6 +125,24 @@ def extract_data_with_groq(text, doc_type, api_key, model):
 
 # --- UI PRINCIPAL ---
 st.header("📂 Carga de Documentos")
+
+with st.expander("📖 Guía de Preparación de Documentos (LEER PRIMERO)", expanded=True):
+    st.markdown("""
+    Para que el **Súper-Auditor de 120B** funcione correctamente, asegúrate de seguir estas reglas:
+    
+    1.  **📄 Contrato (PDF)**: Debe ser el archivo original del contrato u orden (OSE/CPS). De aquí la IA extraerá el número oficial y la vigencia.
+    2.  **📋 Formato 4013 (PDF)**: 
+        *   **Composición**: Este archivo es la unión (PDF) de:
+            1. El excel `U-FT-12.010.069_Certificacion_determinacion_cedular_Rentas_de_Trabajo_V.6.1_VF` debidamente diligenciado.
+            2. El comprobante de pago de Salud, Pensión y ARL.
+            3. El certificado de la ARL.
+        *   **Regla de Oro**: La unión de estos archivos debe llamarse exactamente **`4013AnexosOSE[Número].pdf`** (Ejemplo: `4013AnexosOSE14.pdf`).
+        *   Asegúrate de que la tabla de fechas sea legible y contenga la columna de **'Pago'**.
+    3.  **📝 Constancia (Docx)**: Debe ser el documento de cumplimiento en Word. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
+    
+    *💡 El sistema realizará un **Triple Cruce** para asegurar que no haya discrepancias entre los tres archivos antes de que los radiques.*
+    """)
+
 c1, c2, c3 = st.columns(3)
 with c1: f_contrato = st.file_uploader("1. Contrato (PDF)", type=["pdf"])
 with c2: f_4013 = st.file_uploader("2. Formato 4013 (PDF)", type=["pdf"])
