@@ -123,19 +123,14 @@ def extract_text_from_docx(docx_file):
 def build_prompt(text, doc_type):
     if doc_type == "contrato":
         return f"""
-    Para que el **Súper-Auditor de 120B** funcione correctamente, asegúrate de seguir estas reglas:
-    
-    1.  **📄 Contrato (PDF)**: Debe ser el archivo original del contrato u orden (OSE/CPS). De aquí la IA extraerá el número oficial y la vigencia.
-    2.  **📋 Formato 4013 (PDF)**: 
-        *   **Composición**: Este archivo es la unión (PDF) de:
-            1. El excel `U-FT-12.010.069_Certificacion_determinacion_cedular_Rentas_de_Trabajo_V.6.1_VF` debidamente diligenciado.
-            2. El comprobante de pago de Salud, Pensión y ARL.
-            3. El certificado de la ARL.
-        *   **Regla de Oro**: La unión de estos archivos debe llamarse exactamente **`4013AnexosOSE[Número].pdf`** (Ejemplo: `4013AnexosOSE14.pdf`).
-        *   Asegúrate de que la tabla de fechas sea legible y contenga la columna de **'Pago'**.
-    3.  **📝 Constancia (Docx)**: Debe ser el documento de cumplimiento en Word. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
-    
-    *💡 El sistema realizará un **Triple Cruce** para asegurar que no haya discrepancias entre los tres archivos antes de que los radiques.*
+Eres un auditor experto de la UNAL. Analiza este CONTRATO/ORDEN PDF.
+
+Extrae en JSON puro los siguientes campos:
+- "numero_orden": Solo el número de la orden contractual. Ejemplo: si ves "OSE No. 14" o "OSE-14-4013", extrae SOLO "14".
+- "fecha_inicio": Fecha de inicio de vigencia (DD/MM/AAAA o AAAA-MM-DD).
+- "fecha_terminacion": Fecha de terminación de vigencia (DD/MM/AAAA o AAAA-MM-DD).
+- "valor_total": Valor total del contrato en pesos (solo números).
+- "nombre_contratista": Nombre completo del contratista.
 
 CRITICO: Devuelve SOLO el bloque JSON. Sin texto adicional.
 TEXTO DEL DOCUMENTO:
@@ -222,8 +217,9 @@ else:
     tipo_filtro = st.sidebar.radio("Tipo de Modelos", ["Poderosos (SOTA)", "Versiones Gratis"])
     if tipo_filtro == "Poderosos (SOTA)":
         available_models = {
-            "DeepSeek V3": "deepseek/deepseek-chat",
-            "Gemini 2.0 Flash Lite (Paid)": "google/gemini-2.0-flash-lite-001"
+            "DeepSeek V3.2": "deepseek/deepseek-v3.2",
+            "Gemini 2.5 Flash": "google/gemini-2.5-flash",
+            "Gemini 2.5 Flash Lite": "google/gemini-2.5-flash-lite"
         }
     else:
         available_models = {
@@ -241,10 +237,19 @@ st.markdown("### Centro de Prototipado · Auditoría de Triple Cruce")
 
 with st.expander("📖 Guía de Preparación de Documentos", expanded=False):
     st.info("""
-    1. **Contrato (PDF)**: Archivo original de la orden OSE/CPS.
-    2. **Formato 4013 (PDF)**: Unión de la certificación excel + comprobante planilla + certificado ARL.  
-       Debe nombrarse: `4013AnexosOSE[N°].pdf` (Ej: `4013AnexosOSE14.pdf`)
-    3. **Constancia (DOCX)**: Documento Word de cumplimiento contractual.
+    Para que el **Súper-Auditor de 120B** funcione correctamente, asegúrate de seguir estas reglas:
+    
+    1.  **📄 Contrato (PDF)**: Debe ser el archivo original del contrato u orden (OSE/CPS). De aquí la IA extraerá el número oficial y la vigencia.
+    2.  **📋 Formato 4013 (PDF)**: 
+        *   **Composición**: Este archivo es la unión (PDF) de:
+            1. El excel `U-FT-12.010.069_Certificacion_determinacion_cedular_Rentas_de_Trabajo_V.6.1_VF` debidamente diligenciado.
+            2. El comprobante de pago de Salud, Pensión y ARL.
+            3. El certificado de la ARL.
+        *   **Regla de Oro**: La unión de estos archivos debe llamarse exactamente **`4013AnexosOSE[Número].pdf`** (Ejemplo: `4013AnexosOSE14.pdf`).
+        *   Asegúrate de que la tabla de fechas sea legible y contenga la columna de **'Pago'**.
+    3.  **📝 Constancia (Docx)**: Debe ser el documento de cumplimiento en Word. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
+    
+    *💡 El sistema realizará un **Triple Cruce** para asegurar que no haya discrepancias entre los tres archivos antes de que los radiques.*
     """)
 
 c1, c2, c3 = st.columns(3)
