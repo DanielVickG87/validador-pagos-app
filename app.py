@@ -217,14 +217,14 @@ else:
     tipo_filtro = st.sidebar.radio("Tipo de Modelos", ["Poderosos (SOTA)", "Versiones Gratis"])
     if tipo_filtro == "Poderosos (SOTA)":
         available_models = {
-            "DeepSeek V3.2": "deepseek/deepseek-v3.2",
-            "Gemini 2.5 Flash": "google/gemini-2.5-flash",
-            "Gemini 2.5 Flash Lite": "google/gemini-2.5-flash-lite"
+            "Gemini 2.0 Flash Lite": "google/gemini-2.0-flash-lite-001",
+            "Gemini 2.5 Flash Lite": "google/gemini-2.5-flash-lite",
+            "DeepSeek V3.2": "deepseek/deepseek-v3.2"
         }
     else:
         available_models = {
-            "GPT-OSS 120B (Free)": "openai/gpt-oss-120b:free",
-            "Qwen 3.6 Plus": "qwen/qwen3.6-plus:free"
+            "GPT-OSS 120B Free": "openai/gpt-oss-120b:free",
+            "Qwen 3.6 Plus Free": "qwen/qwen3.6-plus:free"
         }
     default_key = ""
 
@@ -237,7 +237,7 @@ st.markdown("### Centro de Prototipado · Auditoría de Triple Cruce")
 
 with st.expander("📖 Guía de Preparación de Documentos", expanded=False):
     st.info("""
-    Para que el **Súper-Auditor de 120B** funcione correctamente, asegúrate de seguir estas reglas:
+    Para que el **Súper-Auditor** funcione correctamente, asegúrate de seguir estas reglas:
     
     1.  **📄 Contrato (PDF)**: Debe ser el archivo original del contrato u orden (OSE/CPS). De aquí la IA extraerá el número oficial y la vigencia.
     2.  **📋 Formato 4013 (PDF)**: 
@@ -247,7 +247,7 @@ with st.expander("📖 Guía de Preparación de Documentos", expanded=False):
             3. El certificado de la ARL.
         *   **Regla de Oro**: La unión de estos archivos debe llamarse exactamente **`4013AnexosOSE[Número].pdf`** (Ejemplo: `4013AnexosOSE14.pdf`).
         *   Asegúrate de que la tabla de fechas sea legible y contenga la columna de **'Pago'**.
-    3.  **📝 Constancia (Docx)**: Debe ser el documento de cumplimiento en Word. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
+    3.  **📝 Constancia (PDF)**: Debe ser el documento de cumplimiento en PDF. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
     
     *💡 El sistema realizará un **Triple Cruce** para asegurar que no haya discrepancias entre los tres archivos antes de que los radiques.*
     """)
@@ -255,7 +255,7 @@ with st.expander("📖 Guía de Preparación de Documentos", expanded=False):
 c1, c2, c3 = st.columns(3)
 with c1: f_contrato = st.file_uploader("1. Contrato (PDF)", type=["pdf"])
 with c2: f_4013 = st.file_uploader("2. Formato 4013 (PDF)", type=["pdf"])
-with c3: f_constancia = st.file_uploader("3. Constancia (DOCX)", type=["docx"])
+with c3: f_constancia = st.file_uploader("3. Constancia (PDF)", type=["pdf"])
 
 if st.button("🚀 Ejecutar Auditoría de Triple Cruce"):
     if not (f_contrato and f_4013 and f_constancia):
@@ -267,7 +267,7 @@ if st.button("🚀 Ejecutar Auditoría de Triple Cruce"):
             texts = {
                 "contrato": extract_text_from_pdf(f_contrato),
                 "4013": extract_text_from_pdf(f_4013),
-                "constancia": extract_text_from_docx(f_constancia)
+                "constancia": extract_text_from_pdf(f_constancia)
             }
 
             # 2. ANÁLISIS POR IA (uno por documento)
@@ -490,23 +490,23 @@ if st.button("🚀 Ejecutar Auditoría de Triple Cruce"):
             fecha_pago_planilla    = normalize_date(e_4.get("fecha_pago_ss", ""))
 
             # Fallback robusto: extraer fecha_expedicion directamente del texto si la IA falló
-            if fecha_expedicion in ["-", ""]:
+            if fecha_expedicion in ["-", ""] or not re.search(r'\d', fecha_expedicion):
                 constancia_text = texts.get("constancia", "")
                 patrones = [
-                    r'el\s+d[i\xed]a\s+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4}|\d{1,2}[/\-]\d{2}[/\-]\d{4})',
-                    r'ciudad\s+de\s+Manizales[,\s]+?(el\s+)?(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
-                    r'Manizales[,\s]+?(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
-                    r'expide[^\d]+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
-                    r'se\s+expide[^\d]+(\d{1,2}[/\-]\d{2}[/\-]\d{4})',
-                    r'día\s+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
-                    r'(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
-                    r'(\d{1,2}[/\-]\d{2}[/\-]\d{4})',
+                    r'el\s+d[i\xed]a\s+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
+                    r'el\s+d[i\xed]a\s+(\d{1,2}[/\-]\d{2}[/\-]\d{4})',
+                    r'ciudad\s+de\s+Manizales[,\s]+el\s+d[i\xed]a\s+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
+                    r'Manizales[,\s]+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
+                    r'se\s+expide[^\d]+(\d{1,2}\s+de\s+\w+\s+de\s+\d{4})',
                 ]
                 for patron in patrones:
                     m_exp = re.search(patron, constancia_text, re.IGNORECASE | re.DOTALL)
                     if m_exp:
-                        fecha_expedicion = normalize_date(m_exp.group(-1).strip())
-                        break
+                        candidato = m_exp.group(1).strip()
+                        if re.search(r'\d{1,2}', candidato):
+                            fecha_expedicion = normalize_date(candidato)
+                            if fecha_expedicion not in ["-", ""] and re.search(r'\d{4}', fecha_expedicion):
+                                break
 
             col_h, col_i, col_j = st.columns(3)
             with col_h:
