@@ -123,14 +123,19 @@ def extract_text_from_docx(docx_file):
 def build_prompt(text, doc_type):
     if doc_type == "contrato":
         return f"""
-Eres un auditor experto de la UNAL. Analiza este CONTRATO/ORDEN PDF.
-
-Extrae en JSON puro los siguientes campos:
-- "numero_orden": Solo el número de la orden contractual. Ejemplo: si ves "OSE No. 14" o "OSE-14-4013", extrae SOLO "14".
-- "fecha_inicio": Fecha de inicio de vigencia (DD/MM/AAAA o AAAA-MM-DD).
-- "fecha_terminacion": Fecha de terminación de vigencia (DD/MM/AAAA o AAAA-MM-DD).
-- "valor_total": Valor total del contrato en pesos (solo números).
-- "nombre_contratista": Nombre completo del contratista.
+    Para que el **Súper-Auditor de 120B** funcione correctamente, asegúrate de seguir estas reglas:
+    
+    1.  **📄 Contrato (PDF)**: Debe ser el archivo original del contrato u orden (OSE/CPS). De aquí la IA extraerá el número oficial y la vigencia.
+    2.  **📋 Formato 4013 (PDF)**: 
+        *   **Composición**: Este archivo es la unión (PDF) de:
+            1. El excel `U-FT-12.010.069_Certificacion_determinacion_cedular_Rentas_de_Trabajo_V.6.1_VF` debidamente diligenciado.
+            2. El comprobante de pago de Salud, Pensión y ARL.
+            3. El certificado de la ARL.
+        *   **Regla de Oro**: La unión de estos archivos debe llamarse exactamente **`4013AnexosOSE[Número].pdf`** (Ejemplo: `4013AnexosOSE14.pdf`).
+        *   Asegúrate de que la tabla de fechas sea legible y contenga la columna de **'Pago'**.
+    3.  **📝 Constancia (Docx)**: Debe ser el documento de cumplimiento en Word. El sistema verificará que el número de contrato y el periodo coincidan con los PDFs.
+    
+    *💡 El sistema realizará un **Triple Cruce** para asegurar que no haya discrepancias entre los tres archivos antes de que los radiques.*
 
 CRITICO: Devuelve SOLO el bloque JSON. Sin texto adicional.
 TEXTO DEL DOCUMENTO:
@@ -225,7 +230,7 @@ else:
             "GPT-OSS 120B (Free)": "openai/gpt-oss-120b:free",
             "Qwen 3.6 Plus": "qwen/qwen3.6-plus:free"
         }
-    default_key = "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"
+    default_key = ""
 
 selected_model_id = available_models[st.sidebar.selectbox("Modelo", list(available_models.keys()))]
 user_api_key = st.sidebar.text_input(f"API Key {ai_provider}", value=default_key, type="password")
