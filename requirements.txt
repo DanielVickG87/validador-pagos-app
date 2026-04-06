@@ -1,0 +1,6 @@
+streamlit
+pypdf
+python-docx
+groq
+pandas
+jinja2
